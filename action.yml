@@ -36,6 +36,11 @@ inputs:
            }
         }
 
+  ALL_AFFECTED_TAG:
+    description: 'Tag to use when all projects where affected'
+    required: false
+    default: "all projects affected"
+
   NX_HEAD:
     description: 'HEAD definition for NX affected command'
     required: false

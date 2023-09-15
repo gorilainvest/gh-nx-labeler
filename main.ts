@@ -40,10 +40,9 @@ function getEnvironmentVariables() {
     throw Error('GITHUB_TOKEN is required');
   }
 
-  console.log(core.getInput("LABEL_PREFIX_DEFINITIONS"))
-  console.log(core.getInput("PROJECT_TYPE_ABBREVIATIONS "))
+  const allAffectedTag = core.getInput("ALL_AFFECTED_TAG")
   const labelPrefix = JSON.parse(core.getInput("LABEL_PREFIX_DEFINITIONS"))
-  const projectTypeAbbreviations = JSON.parse(core.getInput("PROJECT_TYPE_ABBREVIATIONS "))
+  const projectTypeAbbreviations = JSON.parse(core.getInput("PROJECT_TYPE_ABBREVIATIONS"))
   const nxHead = core.getInput("NX_HEAD")
   const nxBase = core.getInput("NX_BASE")
 
@@ -53,10 +52,12 @@ function getEnvironmentVariables() {
     token,
     projectTypeAbbreviations,
     labelPrefix,
+    allAffectedTag,
   };
 }
 
 async function collectAffectedTags(
+  allAffectedTag: string,
   nxBase: string,
   nxHead: string
 ): Promise<Set<string>> {
@@ -67,7 +68,7 @@ async function collectAffectedTags(
     nx.readProjectsConfigurationFromProjectGraph(projectGraph).projects;
 
   if (affected.length === Object.keys(configurations).length) {
-    tags.add('all projects affected');
+    tags.add(allAffectedTag);
   } else {
     for (const project of affected) {
       const config = configurations[project];
@@ -130,10 +131,10 @@ async function createMissingLabels(
 }
 
 export default async function main() {
-  const { nxBase, nxHead, token } = getEnvironmentVariables();
+  const { nxBase, nxHead, token, allAffectedTag } = getEnvironmentVariables();
   const octokit = github.getOctokit(token);
 
-  const affectedTags = await collectAffectedTags(nxBase, nxHead);
+  const affectedTags = await collectAffectedTags(allAffectedTag, nxBase, nxHead);
   const repositoryLabels = await fetchRepositoryLabels(octokit);
 
   await createMissingLabels(octokit, affectedTags, repositoryLabels);
