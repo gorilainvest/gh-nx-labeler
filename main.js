@@ -32,15 +32,15 @@ function getEnvironmentVariables() {
     if (!token) {
         throw Error('GITHUB_TOKEN is required');
     }
-    const allAffectedTag = process.env.ALL_AFFECTED_TAG;
+    const allAffectedTag = process.env.ALL_AFFECTED_TAG ?? "all projects affected";
+    const nxHead = process.env.NX_HEAD ?? "HEAD";
+    const nxBase = process.env.NX_BASE ?? "origin/main";
     const labelPrefix = process.env.LABEL_PREFIX_DEFINITIONS
         ? JSON.parse(process.env.LABEL_PREFIX_DEFINITIONS)
         : defaultLabelPrefixDefinitions;
     const projectTypeAbbreviations = process.env.PROJECT_TYPE_ABBREVIATIONS
         ? JSON.parse(process.env.PROJECT_TYPE_ABBREVIATIONS)
         : defaultProjectTypeAbbreviations;
-    const nxHead = process.env.NX_HEAD;
-    const nxBase = process.env.NX_BASE;
     return {
         nxHead,
         nxBase,
