@@ -191,4 +191,4 @@ export async function run(): Promise<void> {
     labels: Array.from(affectedTags)
   })
 }
-run()
+await run()

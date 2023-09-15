@@ -124,4 +124,4 @@ export async function run() {
         labels: Array.from(affectedTags)
     });
 }
-run();
+await run();
