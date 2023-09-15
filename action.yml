@@ -13,25 +13,28 @@ inputs:
     required: false
     default: >
         {
-          application: 'app',
-          library: 'lib',
-          language: 'lang'
+           "application":"app",
+           "library":"lib",
+           "language":"lang"
         }
   LABEL_PREFIX_DEFINITIONS:
     description: 'Definitions for label prefixes'
     required: false
     default: >
-      {
-        app: {
-          color: 'D4C5F9',
-          description: 'Pull request affected the application',
-        },
-        lang: {
-          color: 'C2E0C6',
-          description: 'Projects of this language were affected by the pull request',
-        },
-        lib: { color: 'BFD4F2', description: 'Pull request affected the library' }
-      }
+        {
+           "app":{
+              "color":"D4C5F9",
+              "description":"Pull request affected the application"
+           },
+           "lang":{
+              "color":"C2E0C6",
+              "description":"Projects of this language were affected by the pull request"
+           },
+           "lib":{
+              "color":"BFD4F2",
+              "description":"Pull request affected the library"
+           }
+        }
 
   NX_HEAD:
     description: 'HEAD definition for NX affected command'
