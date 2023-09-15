@@ -10,6 +10,12 @@ type LabelPrefixDefinition = {
 
 type Octokit = ReturnType<typeof github.getOctokit>
 
+type PRInfo = {
+  owner: string
+  repo: string
+  number: number
+}
+
 type EnvironmentVaribles = {
   nxHead: string
   nxBase: string
@@ -53,7 +59,7 @@ async function getAffectedProjects(
   return stdout.split('\n').filter(line => line.length > 0)
 }
 
-const getPRInfo = async (octokit: Octokit) => {
+const getPRInfo = async (octokit: Octokit): Promise<PRInfo> => {
   const ctx = github.context;
   if (ctx.issue.number) {
     const { owner, repo, number } = ctx.issue
@@ -187,6 +193,14 @@ export async function run(): Promise<void> {
   } = getEnvironmentVariables()
   const octokit = github.getOctokit(token)
 
+  let pullRequestInfo: PRInfo;
+  try {
+    pullRequestInfo = await getPRInfo(octokit)
+  } catch (e) {
+    console.log('Could not get Pull Request info. Nothing to do.')
+    return
+  }
+
   const affectedTags = await collectAffectedTags(
     allAffectedTag,
     nxBase,
@@ -196,7 +210,6 @@ export async function run(): Promise<void> {
 
   const repositoryLabels = await fetchRepositoryLabels(octokit)
 
-  const { owner, repo, number } = await getPRInfo(octokit)
 
   await createMissingLabels(
     octokit,
@@ -206,9 +219,9 @@ export async function run(): Promise<void> {
   )
 
   await octokit.rest.issues.addLabels({
-    owner,
-    repo,
-    issue_number: number,
+    owner: pullRequestInfo.owner,
+    repo: pullRequestInfo.repo,
+    issue_number: pullRequestInfo.number,
     labels: Array.from(affectedTags)
   })
 }

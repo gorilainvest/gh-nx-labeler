@@ -132,14 +132,21 @@ async function createMissingLabels(octokit, tags, existingLabels, labelPrefix) {
 export async function run() {
     const { nxBase, nxHead, token, allAffectedTag, projectTypeAbbreviations, labelPrefix } = getEnvironmentVariables();
     const octokit = github.getOctokit(token);
+    let pullRequestInfo;
+    try {
+        pullRequestInfo = await getPRInfo(octokit);
+    }
+    catch (e) {
+        console.log('Could not get Pull Request info. Nothing to do.');
+        return;
+    }
     const affectedTags = await collectAffectedTags(allAffectedTag, nxBase, nxHead, projectTypeAbbreviations);
     const repositoryLabels = await fetchRepositoryLabels(octokit);
-    const { owner, repo, number } = await getPRInfo(octokit);
     await createMissingLabels(octokit, affectedTags, repositoryLabels, labelPrefix);
     await octokit.rest.issues.addLabels({
-        owner,
-        repo,
-        issue_number: number,
+        owner: pullRequestInfo.owner,
+        repo: pullRequestInfo.repo,
+        issue_number: pullRequestInfo.number,
         labels: Array.from(affectedTags)
     });
 }
