@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "nodenext",
+        "target": "es2020",
+        "module": "NodeNext",
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "types": ["node"]
+    },
+    "include": ["*.ts"]
+}

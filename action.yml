@@ -1,0 +1,53 @@
+name: 'Label NX Affected Projects Action'
+description: 'Label affected NX projects and their tags'
+branding:
+  icon: 'bookmark'
+  color: 'green'
+
+inputs:
+  GITHUB_TOKEN:
+    description: 'GitHub token'
+    required: true
+  PROJECT_TYPE_ABBREVIATIONS:
+    description: 'Abbreviations for project types'
+    required: false
+    default: >
+        {
+          application: 'app',
+          library: 'lib',
+          language: 'lang'
+        }
+  LABEL_PREFIX_DEFINITIONS:
+    description: 'Definitions for label prefixes'
+    required: false
+    default: >
+      {
+        app: {
+          color: 'D4C5F9',
+          description: 'Pull request affected the application',
+        },
+        lang: {
+          color: 'C2E0C6',
+          description: 'Projects of this language were affected by the pull request',
+        },
+        lib: { color: 'BFD4F2', description: 'Pull request affected the library' }
+      }
+
+  NX_HEAD:
+    description: 'HEAD definition for NX affected command'
+    required: false
+    default: "HEAD"
+  NX_BASE:
+    description: 'BASE definition for NX affected command'
+    required: false
+    default: "origin/main"
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+    PROJECT_TYPE_ABBREVIATIONS: ${{ inputs.PROJECT_TYPE_ABBREVIATIONS }}
+    LABEL_PREFIX_DEFINITIONS: ${{ inputs.LABEL_PREFIX_DEFINITIONS }}
+    NX_BASE: ${{ inputs.NX_BASE }}
+    NX_HEAD: ${{ inputs.NX_HEAD }}
