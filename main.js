@@ -114,7 +114,6 @@ export async function run() {
     const { nxBase, nxHead, token, allAffectedTag, projectTypeAbbreviations, labelPrefix } = getEnvironmentVariables();
     const octokit = github.getOctokit(token);
     const affectedTags = await collectAffectedTags(allAffectedTag, nxBase, nxHead, projectTypeAbbreviations);
-    console.log(affectedTags);
     const repositoryLabels = await fetchRepositoryLabels(octokit);
     await createMissingLabels(octokit, affectedTags, repositoryLabels, labelPrefix);
     const { owner, repo, number } = github.context.issue;
@@ -125,4 +124,3 @@ export async function run() {
         labels: Array.from(affectedTags)
     });
 }
-run()

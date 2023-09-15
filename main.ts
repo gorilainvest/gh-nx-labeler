@@ -174,7 +174,6 @@ export async function run(): Promise<void> {
     projectTypeAbbreviations
   )
 
-    console.log(affectedTags)
   const repositoryLabels = await fetchRepositoryLabels(octokit)
 
   await createMissingLabels(
