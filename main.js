@@ -27,6 +27,23 @@ async function getAffectedProjects(nxBase, nxHead) {
     const { stdout } = await execAsync(`yarn nx show projects --affected --base=${nxBase} ---head=${nxHead}`);
     return stdout.split('\n').filter(line => line.length > 0);
 }
+const getPRInfo = async (octokit) => {
+    const ctx = github.context;
+    if (ctx.issue.number) {
+        const { owner, repo, number } = ctx.issue;
+        return { owner, repo, number };
+    }
+    else {
+        // Trigger event was a push not a pull request
+        const { owner, repo } = ctx.repo;
+        const number = (await octokit.rest.repos.listPullRequestsAssociatedWithCommit({
+            commit_sha: ctx.sha,
+            owner: ctx.repo.owner,
+            repo: ctx.repo.repo,
+        })).data[0].number;
+        return { owner, repo, number };
+    }
+};
 function getEnvironmentVariables() {
     const token = process.env.GITHUB_TOKEN;
     if (!token) {
@@ -77,7 +94,7 @@ async function collectAffectedTags(allAffectedTag, nxBase, nxHead, projectTypeAb
     return tags;
 }
 async function fetchRepositoryLabels(octokit) {
-    const { owner, repo } = github.context.issue;
+    const { owner, repo } = await getPRInfo(octokit);
     const repositoryLabels = new Set();
     let hasMorePages = true;
     let page = 1;
@@ -95,7 +112,7 @@ async function fetchRepositoryLabels(octokit) {
     return repositoryLabels;
 }
 async function createMissingLabels(octokit, tags, existingLabels, labelPrefix) {
-    const { owner, repo } = github.context.issue;
+    const { owner, repo } = await getPRInfo(octokit);
     for (const tag of tags) {
         if (!existingLabels.has(tag)) {
             const [tagPrefix] = tag.split(':');
@@ -117,7 +134,7 @@ export async function run() {
     const octokit = github.getOctokit(token);
     const affectedTags = await collectAffectedTags(allAffectedTag, nxBase, nxHead, projectTypeAbbreviations);
     const repositoryLabels = await fetchRepositoryLabels(octokit);
-    const { owner, repo, number } = github.context.issue;
+    const { owner, repo, number } = await getPRInfo(octokit);
     await createMissingLabels(octokit, affectedTags, repositoryLabels, labelPrefix);
     await octokit.rest.issues.addLabels({
         owner,

@@ -53,6 +53,23 @@ async function getAffectedProjects(
   return stdout.split('\n').filter(line => line.length > 0)
 }
 
+const getPRInfo = async (octokit: Octokit) => {
+  const ctx = github.context;
+  if (ctx.issue.number) {
+    const { owner, repo, number } = ctx.issue
+    return { owner, repo, number };
+  } else {
+    // Trigger event was a push not a pull request
+    const { owner, repo } = ctx.repo
+    const number = (await octokit.rest.repos.listPullRequestsAssociatedWithCommit({
+        commit_sha: ctx.sha,
+        owner: ctx.repo.owner,
+        repo: ctx.repo.repo,
+      })).data[0].number
+    return { owner, repo, number };
+  }
+}
+
 function getEnvironmentVariables(): EnvironmentVaribles {
   const token = process.env.GITHUB_TOKEN
   if (!token) {
@@ -114,7 +131,7 @@ async function collectAffectedTags(
 }
 
 async function fetchRepositoryLabels(octokit: Octokit): Promise<Set<string>> {
-  const { owner, repo } = github.context.issue
+  const { owner, repo } = await getPRInfo(octokit)
   const repositoryLabels = new Set<string>()
   let hasMorePages = true
   let page = 1
@@ -140,7 +157,7 @@ async function createMissingLabels(
   existingLabels: Set<string>,
   labelPrefix: Record<string, LabelPrefixDefinition>
 ): Promise<void> {
-  const { owner, repo } = github.context.issue
+  const { owner, repo } = await getPRInfo(octokit)
 
   for (const tag of tags) {
     if (!existingLabels.has(tag)) {
@@ -179,7 +196,7 @@ export async function run(): Promise<void> {
 
   const repositoryLabels = await fetchRepositoryLabels(octokit)
 
-  const { owner, repo, number } = github.context.issue
+  const { owner, repo, number } = await getPRInfo(octokit)
 
   await createMissingLabels(
     octokit,
