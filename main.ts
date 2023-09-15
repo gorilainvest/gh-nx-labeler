@@ -40,6 +40,8 @@ function getEnvironmentVariables() {
     throw Error('GITHUB_TOKEN is required');
   }
 
+  console.log(core.getInput("LABEL_PREFIX_DEFINITIONS"))
+  console.log(core.getInput("PROJECT_TYPE_ABBREVIATIONS "))
   const labelPrefix = JSON.parse(core.getInput("LABEL_PREFIX_DEFINITIONS"))
   const projectTypeAbbreviations = JSON.parse(core.getInput("PROJECT_TYPE_ABBREVIATIONS "))
   const nxHead = core.getInput("NX_HEAD")
