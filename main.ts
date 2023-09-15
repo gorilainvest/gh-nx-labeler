@@ -114,16 +114,17 @@ async function collectAffectedTags(
 }
 
 async function fetchRepositoryLabels(octokit: Octokit): Promise<Set<string>> {
+  const { owner, repo } = github.context.issue
   const repositoryLabels = new Set<string>()
   let hasMorePages = true
   let page = 1
 
   while (hasMorePages) {
     const result = await octokit.rest.issues.listLabelsForRepo({
-      owner: 'gorilainvest',
-      repo: 'securities',
+      owner,
+      repo,
+      page,
       per_page: 100,
-      page
     })
     result.data.map(label => repositoryLabels.add(label.name))
     hasMorePages = result.data.length === 100
@@ -139,14 +140,16 @@ async function createMissingLabels(
   existingLabels: Set<string>,
   labelPrefix: Record<string, LabelPrefixDefinition>
 ): Promise<void> {
+  const { owner, repo } = github.context.issue
+
   for (const tag of tags) {
     if (!existingLabels.has(tag)) {
       const [tagPrefix] = tag.split(':')
       if (labelPrefix[tagPrefix]) {
         console.log(`Creating custom definition for label ${tag}`)
         await octokit.rest.issues.createLabel({
-          owner: 'gorilainvest',
-          repo: 'securities',
+          owner,
+          repo,
           name: tag,
           color: labelPrefix[tagPrefix].color,
           description: labelPrefix[tagPrefix].description
@@ -176,6 +179,8 @@ export async function run(): Promise<void> {
 
   const repositoryLabels = await fetchRepositoryLabels(octokit)
 
+  const { owner, repo, number } = github.context.issue
+
   await createMissingLabels(
     octokit,
     affectedTags,
@@ -183,7 +188,6 @@ export async function run(): Promise<void> {
     labelPrefix
   )
 
-  const { owner, repo, number } = github.context.issue
   await octokit.rest.issues.addLabels({
     owner,
     repo,
