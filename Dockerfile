@@ -10,4 +10,4 @@ COPY . .
 
 RUN npm run build
 
-CMD ["sh", "-c", "cp /usr/src/app/main.js . && cp /usr/src/app/node_modules/* node_modules && node main.js"]
+CMD ["sh", "-c", "cp /usr/src/app/main.js . && cp -rn /usr/src/app/node_modules/* node_modules && node main.js"]
