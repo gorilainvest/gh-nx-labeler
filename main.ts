@@ -11,7 +11,7 @@ async function getAffectedProjects(
   nxHead: string
 ): Promise<string[]> {
   const { stdout } = await execAsync(
-    `npx --yes nx show projects --affected --base=${nxBase} ---head=${nxHead}`
+    `nx show projects --affected --base=${nxBase} ---head=${nxHead}`
   );
   return stdout.split('\n').filter((line) => line.length > 0);
 }
