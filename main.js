@@ -71,10 +71,6 @@ async function collectAffectedTags(allAffectedTag, nxBase, nxHead, projectTypeAb
     const tags = new Set();
     const projectGraph = await nx.createProjectGraphAsync();
     const affected = await getAffectedProjects(nxBase, nxHead);
-    if (affected.length === 0) {
-        console.log("No projects affected, skipping labeling.");
-        return;
-    }
     console.log('Affected projects: ', affected);
     const configurations = nx.readProjectsConfigurationFromProjectGraph(projectGraph).projects;
     if (affected.length === Object.keys(configurations).length) {
@@ -145,6 +141,10 @@ export async function run() {
         return;
     }
     const affectedTags = await collectAffectedTags(allAffectedTag, nxBase, nxHead, projectTypeAbbreviations);
+    if (affectedTags.size === 0) {
+        console.log("No projects affected, skipping labeling.");
+        return;
+    }
     const repositoryLabels = await fetchRepositoryLabels(octokit);
     await createMissingLabels(octokit, affectedTags, repositoryLabels, labelPrefix);
     await octokit.rest.issues.addLabels({

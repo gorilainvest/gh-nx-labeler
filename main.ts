@@ -113,11 +113,6 @@ async function collectAffectedTags(
   const tags = new Set<string>()
   const projectGraph = await nx.createProjectGraphAsync()
   const affected = await getAffectedProjects(nxBase, nxHead)
-  
-  if(affected.length === 0){
-      console.log("No projects affected, skipping labeling.")
-      return 
-  }
 
   console.log('Affected projects: ', affected)
   const configurations =
@@ -213,6 +208,11 @@ export async function run(): Promise<void> {
     nxHead,
     projectTypeAbbreviations
   )
+
+  if(affectedTags.size === 0){
+      console.log("No projects affected, skipping labeling.")
+      return 
+  }
 
   const repositoryLabels = await fetchRepositoryLabels(octokit)
 
