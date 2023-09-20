@@ -113,6 +113,12 @@ async function collectAffectedTags(
   const tags = new Set<string>()
   const projectGraph = await nx.createProjectGraphAsync()
   const affected = await getAffectedProjects(nxBase, nxHead)
+  
+  if(affected.length === 0){
+      console.log("No projects affected, skipping labeling.")
+      return 
+  }
+
   console.log('Affected projects: ', affected)
   const configurations =
     nx.readProjectsConfigurationFromProjectGraph(projectGraph).projects
