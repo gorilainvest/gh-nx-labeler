@@ -130,7 +130,7 @@ async function createMissingLabels(octokit, tags, existingLabels, labelPrefix) {
     }
 }
 export async function run() {
-    const { nxBase, nxHead, token, allAffectedTag, projectTypeAbbreviations, labelPrefix } = getEnvironmentVariables();
+    const { token, allAffectedTag, projectTypeAbbreviations, labelPrefix } = getEnvironmentVariables();
     const octokit = github.getOctokit(token);
     let pullRequestInfo;
     try {

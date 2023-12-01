@@ -180,8 +180,6 @@ async function createMissingLabels(
 
 export async function run(): Promise<void> {
   const {
-    nxBase,
-    nxHead,
     token,
     allAffectedTag,
     projectTypeAbbreviations,
