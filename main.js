@@ -22,9 +22,9 @@ const defaultLabelPrefixDefinitions = {
         "description": "Pull request affected the library"
     }
 };
-async function getAffectedProjects(nxBase, nxHead) {
+async function getAffectedProjects() {
     console.log('Getting affected projects names');
-    const { stdout } = await execAsync(`yarn nx show projects --affected --base=${nxBase} ---head=${nxHead}`);
+    const { stdout } = await execAsync(`yarn nx show projects --affected`);
     return stdout.split('\n').filter(line => line.length > 0);
 }
 const getPRInfo = async (octokit) => {
@@ -67,10 +67,10 @@ function getEnvironmentVariables() {
         allAffectedTag
     };
 }
-async function collectAffectedTags(allAffectedTag, nxBase, nxHead, projectTypeAbbreviations) {
+async function collectAffectedTags(allAffectedTag, projectTypeAbbreviations) {
     const tags = new Set();
     const projectGraph = await nx.createProjectGraphAsync();
-    const affected = await getAffectedProjects(nxBase, nxHead);
+    const affected = await getAffectedProjects();
     console.log('Affected projects: ', affected);
     const configurations = nx.readProjectsConfigurationFromProjectGraph(projectGraph).projects;
     if (affected.length === Object.keys(configurations).length) {
@@ -140,7 +140,7 @@ export async function run() {
         console.log('Could not get Pull Request info. Nothing to do.');
         return;
     }
-    const affectedTags = await collectAffectedTags(allAffectedTag, nxBase, nxHead, projectTypeAbbreviations);
+    const affectedTags = await collectAffectedTags(allAffectedTag, projectTypeAbbreviations);
     if (affectedTags.size === 0) {
         console.log("No projects affected, skipping labeling.");
         return;

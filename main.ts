@@ -48,13 +48,10 @@ const defaultLabelPrefixDefinitions: Record<string, LabelPrefixDefinition> = {
   }
 };
 
-async function getAffectedProjects(
-  nxBase: string,
-  nxHead: string
-): Promise<string[]> {
+async function getAffectedProjects(): Promise<string[]> {
   console.log('Getting affected projects names')
   const { stdout } = await execAsync(
-    `yarn nx show projects --affected --base=${nxBase} ---head=${nxHead}`
+    `yarn nx show projects --affected`
   )
   return stdout.split('\n').filter(line => line.length > 0)
 }
@@ -106,13 +103,11 @@ function getEnvironmentVariables(): EnvironmentVaribles {
 
 async function collectAffectedTags(
   allAffectedTag: string,
-  nxBase: string,
-  nxHead: string,
   projectTypeAbbreviations: Record<string, string>
 ): Promise<Set<string>> {
   const tags = new Set<string>()
   const projectGraph = await nx.createProjectGraphAsync()
-  const affected = await getAffectedProjects(nxBase, nxHead)
+  const affected = await getAffectedProjects()
 
   console.log('Affected projects: ', affected)
   const configurations =
@@ -204,8 +199,6 @@ export async function run(): Promise<void> {
 
   const affectedTags = await collectAffectedTags(
     allAffectedTag,
-    nxBase,
-    nxHead,
     projectTypeAbbreviations
   )
 
