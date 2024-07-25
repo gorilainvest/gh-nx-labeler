@@ -4,28 +4,28 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 const execAsync = promisify(exec);
 const defaultProjectTypeAbbreviations = {
-    "application": "app",
-    "library": "lib",
-    "language": "lang"
+    application: 'app',
+    library: 'lib',
+    language: 'lang',
 };
 const defaultLabelPrefixDefinitions = {
-    "app": {
-        "color": "D4C5F9",
-        "description": "Pull request affected the application"
+    app: {
+        color: 'D4C5F9',
+        description: 'Pull request affected the application',
     },
-    "lang": {
-        "color": "C2E0C6",
-        "description": "Projects of this language were affected by the pull request"
+    lang: {
+        color: 'C2E0C6',
+        description: 'Projects of this language were affected by the pull request',
     },
-    "lib": {
-        "color": "BFD4F2",
-        "description": "Pull request affected the library"
-    }
+    lib: {
+        color: 'BFD4F2',
+        description: 'Pull request affected the library',
+    },
 };
 async function getAffectedProjects() {
     console.log('Getting affected projects names');
     const { stdout } = await execAsync(`yarn nx show projects --affected`);
-    return stdout.split('\n').filter(line => line.length > 0);
+    return stdout.split('\n').filter((line) => line.length > 0);
 }
 const getPRInfo = async (octokit) => {
     const ctx = github.context;
@@ -49,9 +49,9 @@ function getEnvironmentVariables() {
     if (!token) {
         throw Error('GITHUB_TOKEN is required');
     }
-    const allAffectedTag = process.env.ALL_AFFECTED_TAG ?? "all projects affected";
-    const nxHead = process.env.NX_HEAD ?? "HEAD";
-    const nxBase = process.env.NX_BASE ?? "origin/main";
+    const allAffectedTag = process.env.ALL_AFFECTED_TAG ?? 'all projects affected';
+    const nxHead = process.env.NX_HEAD ?? 'HEAD';
+    const nxBase = process.env.NX_BASE ?? 'origin/main';
     const labelPrefix = process.env.LABEL_PREFIX_DEFINITIONS
         ? JSON.parse(process.env.LABEL_PREFIX_DEFINITIONS)
         : defaultLabelPrefixDefinitions;
@@ -64,7 +64,7 @@ function getEnvironmentVariables() {
         token,
         projectTypeAbbreviations,
         labelPrefix,
-        allAffectedTag
+        allAffectedTag,
     };
 }
 async function collectAffectedTags(allAffectedTag, projectTypeAbbreviations) {
@@ -105,7 +105,7 @@ async function fetchRepositoryLabels(octokit) {
             page,
             per_page: 100,
         });
-        result.data.map(label => repositoryLabels.add(label.name));
+        result.data.map((label) => repositoryLabels.add(label.name));
         hasMorePages = result.data.length === 100;
         page++;
     }
@@ -123,7 +123,7 @@ async function createMissingLabels(octokit, tags, existingLabels, labelPrefix) {
                     repo,
                     name: tag,
                     color: labelPrefix[tagPrefix].color,
-                    description: labelPrefix[tagPrefix].description
+                    description: labelPrefix[tagPrefix].description,
                 });
             }
         }
@@ -142,7 +142,7 @@ export async function run() {
     }
     const affectedTags = await collectAffectedTags(allAffectedTag, projectTypeAbbreviations);
     if (affectedTags.size === 0) {
-        console.log("No projects affected, skipping labeling.");
+        console.log('No projects affected, skipping labeling.');
         return;
     }
     const repositoryLabels = await fetchRepositoryLabels(octokit);
@@ -151,7 +151,7 @@ export async function run() {
         owner: pullRequestInfo.owner,
         repo: pullRequestInfo.repo,
         issue_number: pullRequestInfo.number,
-        labels: Array.from(affectedTags)
+        labels: Array.from(affectedTags),
     });
 }
 await run();
