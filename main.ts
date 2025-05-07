@@ -1,5 +1,5 @@
 import * as github from '@actions/github'
-import nx from '@nx/devkit'
+import nx, { detectPackageManager } from '@nx/devkit'
 import { exec } from 'child_process'
 import { promisify } from 'util'
 
@@ -16,7 +16,7 @@ type PRInfo = {
   number: number
 }
 
-type EnvironmentVaribles = {
+type EnvironmentVariables = {
   nxHead: string
   nxBase: string
   token: string
@@ -50,8 +50,11 @@ const defaultLabelPrefixDefinitions: Record<string, LabelPrefixDefinition> = {
 
 async function getAffectedProjects(): Promise<string[]> {
   console.log('Getting affected projects names')
+
+  const packageManager = detectPackageManager();
+
   const { stdout } = await execAsync(
-    `yarn nx show projects --affected`
+    `${packageManager} nx show projects --affected`
   )
   return stdout.split('\n').filter(line => line.length > 0)
 }
@@ -73,7 +76,7 @@ const getPRInfo = async (octokit: Octokit): Promise<PRInfo> => {
   }
 }
 
-function getEnvironmentVariables(): EnvironmentVaribles {
+function getEnvironmentVariables(): EnvironmentVariables {
   const token = process.env.GITHUB_TOKEN
   if (!token) {
     throw Error('GITHUB_TOKEN is required')
@@ -84,7 +87,7 @@ function getEnvironmentVariables(): EnvironmentVaribles {
   const nxBase = process.env.NX_BASE ?? "origin/main"
 
   const labelPrefix = process.env.LABEL_PREFIX_DEFINITIONS 
-  ? JSON.parse(process.env.LABEL_PREFIX_DEFINITIONS) as Record<string, LabelPrefixDefinition>
+    ? JSON.parse(process.env.LABEL_PREFIX_DEFINITIONS) as Record<string, LabelPrefixDefinition>
     : defaultLabelPrefixDefinitions
 
   const projectTypeAbbreviations = process.env.PROJECT_TYPE_ABBREVIATIONS
@@ -222,4 +225,5 @@ export async function run(): Promise<void> {
     labels: Array.from(affectedTags)
   })
 }
+
 await run()
