@@ -1,5 +1,5 @@
 import * as github from '@actions/github';
-import nx from '@nx/devkit';
+import nx, { detectPackageManager } from '@nx/devkit';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 const execAsync = promisify(exec);
@@ -24,7 +24,8 @@ const defaultLabelPrefixDefinitions = {
 };
 async function getAffectedProjects() {
     console.log('Getting affected projects names');
-    const { stdout } = await execAsync(`yarn nx show projects --affected`);
+    const packageManager = detectPackageManager();
+    const { stdout } = await execAsync(`${packageManager} nx show projects --affected`);
     return stdout.split('\n').filter(line => line.length > 0);
 }
 const getPRInfo = async (octokit) => {
